@@ -1,10 +1,107 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <meta charset="UTF-8">
+  <meta charset="UTF-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="viewport" content="width=device-width, height=device-height, initial-scale=1.0, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0" />
+  <meta name="description" content="" />
+	<meta name="keywords" content="" />
+  <meta name="renderer" content="webkit" />
   <title>街区地图</title>
-</head>
-<body>
 
+  <link rel="stylesheet" href="http://cache.amap.com/lbs/static/main1119.css"/>
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+
+<body>
+  <div class="container">
+    <div class="options-box">
+      <h1>街区地图</h1>
+      <div>
+        <table>
+            <tr>
+                <td>
+                    <label>请输入关键字：</label>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <input id="tipinput"/>
+                </td>
+            </tr>
+        </table>
+      </div>
+    </div>
+    <div id="mapArea">
+      <div id="mapTop"></div>
+      <div id="map"></div>
+    </div>
+  </div>
+
+  <script src="http://webapi.amap.com/maps?v=1.3&key=21bf118794abc2b5bfdd161ce34830c2&callback=init&plugin=AMap.Autocomplete,AMap.PlaceSearch"></script>
+  <!-- <script src="js/app.js"></script> -->
+  <script>
+    function init(){
+      // 创建地图对象
+      var map = new AMap.Map('map', {
+        center: [104.072106, 30.663473],
+        zoom: 11
+      });
+
+      map.plugin(["AMap.ToolBar"], function() {
+        // 添加 工具条
+        map.addControl(new AMap.ToolBar());
+      });
+
+      // 创建标记集合
+      var markers = [
+        {title: '天府广场', address:'成都市青羊区人民南路一段86号', position: [104.065767,30.657411]},
+        {title: '文殊院', address: '成都市青羊区文殊院街66号', position: [104.072992,30.675133]},
+        {title: '宽窄巷子', address: '成都市青羊区金河路口宽窄巷子', position: [104.054205,30.663269]},
+        {title: '大熊猫基地', address: '成都市成华区熊猫大道1375号', position: [104.145033,30.737076]},
+        {title: '武侯祠', address: '成都市武侯区武侯祠大街231号', position: [104.048123,30.645983]}
+      ];
+
+      // 创建 默认信息窗体
+      var infoWindow = new AMap.InfoWindow({offset: new AMap.Pixel(0, -30)});
+
+      // 构建标记
+      markers.forEach(function(marker) {
+        var newMarker = new AMap.Marker({
+          map: map,
+          position: [marker.position[0], marker.position[1]],
+          title: marker.title,
+          offset: new AMap.Pixel(-12,-36)
+        });
+        newMarker.content = marker.title + '<br/>' + marker.address;
+          // 为标记绑定 点击事件
+        newMarker.on('click', markerClick);
+      });
+
+      // 点击事件方法主体
+      function markerClick(e) {
+        infoWindow.setContent(e.target.content);
+        infoWindow.open(map, e.target.getPosition());
+      }
+
+      // 根据地图上添加的覆盖物分布情况，自动缩放地图到合适的视野级别
+      map.setFitView();
+
+      //输入提示
+      var autoOptions = {
+          input: "tipinput"
+      };
+      var auto = new AMap.Autocomplete(autoOptions);
+      var placeSearch = new AMap.PlaceSearch({
+          map: map
+      });  //构造地点查询类
+      AMap.event.addListener(auto, "select", select);//注册监听，当选中某条记录时会触发
+      function select(e) {
+          placeSearch.setCity(e.poi.adcode);
+          placeSearch.search(e.poi.name);  //关键字查询查询
+      }
+  }
+  </script>
 </body>
+
 </html>

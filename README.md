@@ -6,6 +6,8 @@
 
 ## 安装与运行
 
+执行`npm install` 安装`http-server`，完成后再项目目录里执行`http-server`即可
+
 ## 问题提交
 
 ## 协议
