@@ -1,6 +1,90 @@
 @charset "UTF-8";
 
+* {
+  margin: 0;
+  padding: 0;
+}
+
 html,
+body {
+  width: 100%;
+  height: 100%;
+}
+
+.content {
+  height: 100%;
+}
+
+.sider {
+  position: absolute;
+  width: 20%;
+  height: 100%;
+  padding: 10px;
+  color: white;
+  background-color: black;
+  transition: width .5s ease;
+  /*transform: translateX(0);*/
+  transition: 0.5s;
+}
+
+.sider--hidden {
+  width: 0;
+  transform: translateX(-100%);
+}
+
+.sider-list li {
+  height: 40px;
+  line-height: 40px;
+  padding-left: 10px;
+  cursor: pointer;
+}
+
+.sider-list li:hover {
+  background-color: #ddd;
+  color: black;
+}
+
+.main {
+  position: absolute;
+  width: 80%;
+  height: 100%;
+  left: 20%;
+  top: 0;
+  transition: left .5s;
+}
+
+.main--full {
+  width: 100%!important;
+  left: 0!important;
+}
+
+.main-map {
+  height: 100%;
+}
+
+#map {
+  height: 100%;
+}
+
+@media (max-width: 768px) {
+  .sider {
+    width: 30%;
+  }
+  .sider-header h3 {
+    font-size: 16px;
+  }
+  .sider-list li {
+    font-size: 12px;
+  }
+  .main {
+    width: 70%;
+    left: 30%;
+  }
+}
+
+
+
+/*html,
 body {
   font-family: Arial, sans-serif;
   height: 100%;
@@ -77,4 +161,4 @@ hr {
 }
 #zoom-to-area {
   width: 24%;
-}
+}*/
