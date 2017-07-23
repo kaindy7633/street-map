@@ -32,7 +32,11 @@
     <div class="main" data-bind="css: { 'main--full' : !siderVisible()}">
       <div class="main-header">
         <button class="btn btn-link" type="button" data-bind="click: toggleSider"><span class="glyphicon glyphicon-menu-hamburger"></span></button>
-        <div style="float:right;padding-top:18px;padding-right:20px;" id="weather"></div>
+        <div style="float:right;padding-top:18px;padding-right:20px;" id="weather">
+          <span data-bind="text: city" style="margin-right:10px;"></span>
+          <span data-bind="text: date" style="margin-right:10px;"></span>
+          <span data-bind="text: weather" style="margin-right:10px;"></span>
+        </div>
       </div>
 
       <div id="mapArea" class="main-map">

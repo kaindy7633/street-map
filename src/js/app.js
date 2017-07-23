@@ -15,6 +15,10 @@ var ViewModel = function () {
   var self = this;
   self.filter = ko.observable('');
   self.siderVisible = ko.observable(true);
+  self.city = ko.observable('');
+  self.date = ko.observable('');
+  self.weather = ko.observable('');   // 天气API
+  var infoWindow = new AMap.InfoWindow({offset: new AMap.Pixel(0, -30)});
 
   /**
    * 动态绑定地址列表
@@ -27,6 +31,8 @@ var ViewModel = function () {
     markers.forEach(function (data) {
       data.setMap(null);
     });
+
+    infoWindow.close();
 
     for (var i = 0, marker; i < res.length; i++) {
       // console.log(res);
@@ -50,32 +56,55 @@ var ViewModel = function () {
     self.siderVisible(!self.siderVisible());
   }
 
-  var infoWindow = new AMap.InfoWindow({offset: new AMap.Pixel(0, -30)});
-
   /**
    * 点击地点高亮地图上的标记
    */
   self.markLot = function (lot) {
 
-    for (var i = 0, marker; i < localtionList.length; i++) {
-      if (lot.title === localtionList[i].title) {
+    if (!self.filter()) {
+      for (var i = 0, marker; i < localtionList.length; i++) {
+        if (lot.title === localtionList[i].title) {
+          marker = new AMap.Marker({
+            map: map,
+            icon: 'http://webapi.amap.com/theme/v1.3/markers/n/mark_r.png',
+            position: [localtionList[i].position[0], localtionList[i].position[1]],
+          });
+        } else {
+          marker = new AMap.Marker({
+            map: map,
+            icon: 'http://webapi.amap.com/theme/v1.3/markers/n/mark_b.png',
+            position: [localtionList[i].position[0], localtionList[i].position[1]],
+          });
+        }
+
+        marker.content = localtionList[i].title + '<br/>' + localtionList[i].address;
+        marker.on('click', markerClick);
+        markers.push(marker);
+
+        if (lot.title === localtionList[i].title) {
+          infoWindow.setContent(marker.content);
+          infoWindow.open(map, marker.getPosition());
+        }
+      }
+    } else {
+      var _data = self.filteredLots();
+      for (var i = 0, marker; i < _data.length; i++) {
         marker = new AMap.Marker({
           map: map,
           icon: 'http://webapi.amap.com/theme/v1.3/markers/n/mark_r.png',
-          position: [localtionList[i].position[0], localtionList[i].position[1]],
+          position: [_data[i].position[0], _data[i].position[1]],
         });
-      } else {
-        marker = new AMap.Marker({
-          map: map,
-          icon: 'http://webapi.amap.com/theme/v1.3/markers/n/mark_b.png',
-          position: [localtionList[i].position[0], localtionList[i].position[1]],
-        });
-      }
 
-      marker.content = localtionList[i].title + '<br/>' + localtionList[i].address;
-      marker.on('click', markerClick);
-      markers.push(marker);
+        marker.content = _data[i].title + '<br/>' + _data[i].address;
+        marker.on('click', markerClick);
+        markers.push(marker);
+
+        infoWindow.setContent(marker.content);
+        infoWindow.open(map, marker.getPosition());
+      }
     }
+
+
 
   }
 
@@ -85,13 +114,39 @@ var ViewModel = function () {
     infoWindow.open(map, e.target.getPosition());
   }
 
+  // 记载第三方天气API
+  self.getLocalWeather = (function() {
+    $.getScript('http://php.weather.sina.com.cn/iframe/index/w_cl.php?code=js&day=0&city=成都&dfc=1&charset=utf-8')
+    .done(function () {
+      var s="", r="", q="";
+      for(s in window.SWther.w){
+        q = SWther.w[s][0];
+        r = {
+          city: s,
+          date: window.SWther.add.now.split(" ")[0] || "",
+          day_weather: q.s1,
+          night_weather: q.s2,
+          day_temp: q.t1,
+          night_temp: q.t2,
+          day_wind: q.p1,
+          night_wind: q.p2
+        }
+      }
+
+      self.city(r.city);
+      self.date(r.date);
+      self.weather(r.day_weather);
+    })
+    .fail(function () {
+      alert('新浪天气API接口调用失败，请稍后再试！');
+    });
+  }());
 }
 
 // 地图数据初始化
 function init(){
   initMap(this.localtionList);
   ko.applyBindings(new ViewModel());
-  getLocalWeather();
 }
 
 // 初始化地图
@@ -120,25 +175,6 @@ function initMap (localtionList) {
     marker.on('click', markerClick);
     markers.push(marker);
   }
-
-  // // 创建标记集合
-  // markers = localtionList;
-  //
-  // // 创建 默认信息窗体
-  // var infoWindow = new AMap.InfoWindow({offset: new AMap.Pixel(0, -30)});
-  //
-  // // 构建标记
-  // markers.forEach(function(marker) {
-  //   var newMarker = new AMap.Marker({
-  //     map: map,
-  //     position: [marker.position[0], marker.position[1]],
-  //     title: marker.title
-  //     // offset: new AMap.Pixel(-12,-36)
-  //   });
-  //   newMarker.content = marker.title + '<br/>' + marker.address;
-  //     // 为标记绑定 点击事件
-  //   newMarker.on('click', markerClick);
-  // });
 
   // 点击事件方法主体
   function markerClick(e) {
@@ -181,27 +217,4 @@ function updateMarkers (localtionList) {
 // 加载地图失败处理
 function mapError () {
   alert('高德地图未能加载成功，请刷新或稍后再试!');
-}
-
-// 加载第三方天气API，获取成都当天天气情况
-function getLocalWeather () {
-  $.getScript('http://php.weather.sina.com.cn/iframe/index/w_cl.php?code=js&day=0&city=成都&dfc=1&charset=utf-8', function () {
-    // 挂载到window对象上
-    var s="", r="", q="";
-    for(s in window.SWther.w){
-      q = SWther.w[s][0];
-      r = {
-        city: s,
-        date: window.SWther.add.now.split(" ")[0] || "",
-        day_weather: q.s1,
-        night_weather: q.s2,
-        day_temp: q.t1,
-        night_temp: q.t2,
-        day_wind: q.p1,
-        night_wind: q.p2
-      }
-    }
-
-    $('#weather').append('<span>'+r.city+'</span>'+'<span>'+r.date+'</span>'+'<span>'+r.day_weather+'</span>');
-  });
 }
