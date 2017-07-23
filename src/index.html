@@ -22,7 +22,7 @@
         <h3>街区地图</h3>
       </div>
       <div class="sider-filter">
-        <input type="text" class="form-control" id="tipinput" data-bind="value: filter, valueUpdate: 'afterkeydown'">
+        <input type="text" class="form-control" data-bind="value: filter, valueUpdate: 'afterkeydown'">
       </div>
       <ul class="sider-list" data-bind="foreach: filteredLots">
         <li data-bind="text: title, click: $parent.markLot">
@@ -32,6 +32,7 @@
     <div class="main" data-bind="css: { 'main--full' : !siderVisible()}">
       <div class="main-header">
         <button class="btn btn-link" type="button" data-bind="click: toggleSider"><span class="glyphicon glyphicon-menu-hamburger"></span></button>
+        <div style="float:right;padding-top:18px;padding-right:20px;" id="weather"></div>
       </div>
 
       <div id="mapArea" class="main-map">
